@@ -1,4 +1,4 @@
-Open source codes for C. elegans motor sequence generation
+Open source codes for <em>C. elegans</em> motor sequence generation
 ======================
 Introduction
 ------------
