@@ -1,4 +1,4 @@
-Open source codes for Flexible Motor Sequence Generations during Stereotyped Escape Responses
+Open source codes for C. elegans motor sequence generation
 ======================
 Introduction
 ------------
