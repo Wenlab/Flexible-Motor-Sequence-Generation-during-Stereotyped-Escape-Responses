@@ -1,8 +1,10 @@
+% This code plot both mean calcium signal and heat map for single trial
+%% load data from data.xlsx and time.xlsx
 clearvars
-minnum = 3;
-backtimemax = 10000;
-
-smoothpara = 40;
+minnum = 3;         % if the number of availble data points is less than 3, 
+                    % the code would not calculate the mean and SEM. 
+backtimemax = 10000;% maximum frame, doesn't really matter
+smoothpara = 40;    % frames per second
 trial = 10;
 individual_trial = 20;
 gcamp_ref = cell(1,trial);
@@ -11,6 +13,7 @@ ratio = cell(1,trial);
 ratio_smo = cell(1,trial);
 smo = cell(1,trial);
 time = cell(1,trial);
+% smooth
 for i = 1:trial
     temp = xlsread('data.xlsx',i);
     gcamp_ref{i} = temp(:,2);
@@ -19,6 +22,7 @@ for i = 1:trial
     time{i} = xlsread('time_turn_ends.xlsx',i);
 end
 totaltime = length(gcamp_ref{1});
+% normalization
 for i = 1:trial
     ratio_smo{i} = smooth(ratio{i},smoothpara);
 	NotANum = isnan(ratio{i});
@@ -30,7 +34,16 @@ for i = 1:trial
     maxtemp = max(ratio_smo{i});
     smo{i} = ( ratio_smo{i} - mintemp ) ./ mintemp ;
 end
-
+%%  Get mean and SEM from 'smo'
+% Key outputs of this section: 
+% Please note that all the variable names do not represent what they
+% actually means, which may cause confusion. I am sorry. 
+% 'turn': a cell array in which each cell contains all the availble values
+%           for calculating the average at a time point during *forward locomotion after turn ends*,
+%           instead of turn
+% 'back': a cell array in which each cell contains all the availble values
+%           for calculating the average at a time point during *turn*,
+%           instead of backward. 
 turn = cell(1,backtimemax);
 back = cell(1,backtimemax);
 heatmap = NaN*zeros(individual_trial,2*backtimemax-1);
@@ -41,9 +54,7 @@ for i = 1:trial
             if isnan(time{i}(3,j)) == 0
                 if isnan( smo{i}(time{i}(2,j)) ) == 0
                     n = n+1;
-                    % turn开始之后，turn中
-                    %plot(1:( time{i}(3,j) - time{i}(2,j) ),smo{i}((time{i}(2,j)+1):time{i}(3,j))-smo{i}(time{i}(2,j)));
-                    %hold on
+                    % after turn ends, during forward
                     for t = (time{i}(2,j)+1):time{i}(3,j)
                         backtime = t-time{i}(2,j);
                         if isnan(smo{i}(t)) == 0
@@ -52,8 +63,8 @@ for i = 1:trial
                             %turn{backtime} = [turn{backtime},smo{i}(t)];
                         end
                     end
-                    % turn开始之前，后退中
                     
+                    % before turn ends, during turn
                     for t = (time{i}(2,j)-1):(-1):time{i}(1,j)
                         backtime = time{i}(2,j)-t;
                         if isnan(smo{i}(t)) == 0
@@ -68,10 +79,12 @@ for i = 1:trial
         end
     end
 end
-
+%% Plot mean GCaMP ratio
 figure
 hold on
-
+% plot mean and SEM during turn
+% 'smoback': mean of smoothed and normalized signal during forward
+% 'smobackstd': STD of smoothed and normalized signal during forward
 smoback = zeros(1,backtimemax);
 smobackstd = zeros(1,backtimemax);
 for t = 1:backtimemax
@@ -87,6 +100,9 @@ smoback_low = smoback - smobackstd;
 plot([0,(1:backtimevis)/50],[0,smoback(1:backtimevis)],'b');
 fill([((1:backtimevis)-1)/50 fliplr(((1:backtimevis)-1)/50)],[smoback_low(1:backtimevis) fliplr(smoback_up(1:backtimevis))],'b','facealpha',0.2,'edgealpha',0);
 
+% plot mean and SEM during turn
+% 'smoback': mean of smoothed and normalized signal during turn
+% 'smobackstd': STD of smoothed and normalized signal during turn
 smoback = zeros(1,backtimemax);
 smobackstd = zeros(1,backtimemax);
 for t = 1:backtimemax
@@ -120,21 +136,3 @@ ylabel('trial');
 xticks([1 50 100 150 200 250 300 350 400]);
 xticklabels({'-4','-3','-2','-1','0','1','2','3','4'});
 colormap('jet');
-
-
-%{
-heatmap_shuffle = heatmap(randperm(size(heatmap,1)),:);
-figure
-gca = pcolor(heatmap_shuffle(:,(backtimemax-4*50):(backtimemax+4*50)));
-caxis([-0.15 0.15]);
-set(gca,'LineStyle','none');
-colorbar;
-title('RIV GCaMP before and after turn starts');
-xlabel('t/s');
-ylabel('trial');
-%set(gca,'xtick',[1 50 100 150 200 250 300 350 400])
-%set(gca,'xticklabel',{'-4','-3','-2','-1','0','1','2','3','4'})
-xticks([1 50 100 150 200 250 300 350 400]);
-xticklabels({'-4','-3','-2','-1','0','1','2','3','4'});
-colormap('jet');
-%}

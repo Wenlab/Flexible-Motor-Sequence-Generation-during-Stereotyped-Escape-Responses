@@ -1,3 +1,5 @@
+% Please go to 'Figure 3E-F\reversalstart.m' for
+% annotation. The two code are exactly the same.
 clearvars
 minnum = 3;
 plotlength = 3;

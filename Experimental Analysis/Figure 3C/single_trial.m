@@ -1,6 +1,7 @@
+%% load data from data.xlsx and time.xlsx
 clearvars
-backtimemax = 2000;
-smoothpara = 100;
+backtimemax = 2000; % maximum frame, doesn't really matter
+smoothpara = 100;   % parameter for smoothing; larger -> more smooth
 trial = 1:6;
 trialnum = length(trial);
 gcamp_ref = cell(1,trialnum);
@@ -9,6 +10,7 @@ ratio = cell(1,trialnum);
 ratio_smo = cell(1,trialnum);
 smo = cell(1,trialnum);
 time = cell(1,trialnum);
+% get raw ratio
 for i = trial
     temp = xlsread('data.xlsx',i);
     gcamp_ref{i} = temp(:,1);
@@ -17,6 +19,7 @@ for i = trial
     time{i} = xlsread('time.xlsx',i);
     time{i} = [time{i};NaN*zeros(1,size(time{i},2))];
 end
+% smooth data
 for i = trial
     ratio_smo{i} = smooth(ratio{i},smoothpara);
     %ratio_smo{i} = ratio{i};
@@ -26,7 +29,9 @@ for i = trial
         ratio_smo{i}( NaNPos(j) ) = NaN;
     end
 end
-
+%% single trial normalization
+% Key output of the section:
+% 'smo': smoothed and normalized GCaMP ratio 
 n = 0;
 for i = 1:trial
     for j = 1:size(time{i},2)
@@ -42,7 +47,7 @@ for i = 1:trial
     end
 end
 individual_trial = n;
-
+%% Plot single trial with sub figures
 figure
 hold on
 for i = 1:43

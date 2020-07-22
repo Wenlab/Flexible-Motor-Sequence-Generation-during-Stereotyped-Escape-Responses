@@ -1,11 +1,16 @@
+% Please go to 'Figure 1C 1D/fit_r1r2_new_timebin1s_final_r1sig.m' for annotation
+% This code use time bin = 0.5s, but the results has been converted to 1s.
+% See line 68-71 for conversion
+
 clearvars
+
 data=xlsread('QW373(combin)(halfnotcount).xlsx');
 dataf=data(:,1);
 datab=data(:,2);
 
 ddt=1;
 
-FracBin=2;    %1.5 or 2.5 is good
+FracBin=2;    % time bin = 0.5s
 dataf=FracBin*dataf;
 datab=FracBin*datab;
 

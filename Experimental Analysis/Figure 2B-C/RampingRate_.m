@@ -1,20 +1,22 @@
+%%% Calculate AIB ramping rate during reversal with and without turn 
+%%% after TAKING OUT all trials that last shorter than 1.5s
+
 clearvars
-mintime = 1.5;
-deleteth = 0.05;
-backtimemax = 200;
-smoothpara = 5;
-smallsmoothpara = 5;
+mintime = 1.5;      % minimal reversal length 
+backtimemax = 200;  % 
+smoothpara = 5;     % parameter for smoothing the signal
+smallsmoothpara = 5;% parameter for smoothing the signal
 trial = 1:17;
 trialnum = length(trial);
-gcamp_ref = cell(1,trialnum);
-gcamp_ori = cell(1,trialnum);
-ratio = cell(1,trialnum);
-ratio_smo = cell(1,trialnum);
-ratio_nor = cell(1,trialnum);
-dRR0 = cell(1,trialnum);
-smo = cell(1,trialnum);
+gcamp_ref = cell(1,trialnum);   % reference GCaMP
+gcamp_ori = cell(1,trialnum);   % raw GCaMP
+ratio = cell(1,trialnum);       % ratio of raw signal and reference signal
+ratio_smo = cell(1,trialnum);   % smoothed ratio
+ratio_nor = cell(1,trialnum);   % normailized ratio (R(t)-R_{min})/(R_{max} - R_{min})
+dRR0 = cell(1,trialnum);        % normailized ratio (R(t)-R_{min})/R_{min}
+smo = cell(1,trialnum);         % normailized smoothed ratio
 time = cell(1,trialnum);
-rampturn = cell(1,trialnum);
+rampturn = cell(1,trialnum);    
 rampnoturn = cell(1,trialnum);
 for i = trial
     temp = xlsread('data.xlsx',i);
@@ -25,15 +27,11 @@ for i = trial
     time{i} = xlsread('time.xlsx',i);
     totaltime(i) = length(gcamp_ref{i});
 end
-%totaltime = length(gcamp_ref{1});
+
+%% Normalization and smoothing
+% 'smo' is the final output of this section, which is the signal after
+% smoothing and normalization
 for i = trial
-    %{
-    ratio_smo{i} = NaN*zeros(totaltime(i),1);
-    for j = 1:size(time{i},2)
-        ratio_smo{i}( (time{i}(1,j)+1) : (time{i}(2,j))  ) = smooth(ratio{i}( (time{i}(1,j)+1) : (time{i}(2,j))  ),smoothpara);
-    end 
-    %}
-    %ratio_smo{i} = smooth(ratio{i},smoothpara);
     ratio_smo{i} = ratio{i};
     if i ==1 
         j = 2;
@@ -64,7 +62,9 @@ for i = trial
 end
 time{2} = [time{2};NaN*zeros(1,5)];
 time{14} = [time{14};NaN*zeros(1,5)];
-
+%% Fit GCaMP with linear regression. Take the slope as ramping rate
+% rampturn: ramping rates with turn
+% rampnoturn: ramping rates without turn
 for i = trial
     if i>=4 & i<=7
         frame = 20;
@@ -80,11 +80,9 @@ for i = trial
                 X = 1:(testlength);
                 X = [ones(testlength,1),X'/50];
                 [b1, bint1,r1,rint1,stats1] = regress(Y,X,0.05);
-                %if stats1(3)>=deleteth
                 if testlength >= mintime*frame
                     rampnoturn{i} = [rampnoturn{i},b1(2)];
                 end
-                %end
                 else
                 Y = smo{i}( (time{i}(1,j)+1) : (time{i}(2,j))  );
                 %Y = dRR0{i}( (time{i}(1,j)+1) : (time{i}(2,j))  );
@@ -92,18 +90,16 @@ for i = trial
                 X = 1:(testlength);
                 X = [ones(testlength,1),X'/50];
                 [b2, bint2,r2,rint2,stats2] = regress(Y,X,0.05);
-                %if stats2(3)>=deleteth
                 if testlength >= mintime*frame
                     rampturn{i} = [rampturn{i},b2(2)];
                 end
-                %end
             end
         end
     end
 end
 
-%%
-for i = 4:7
+%% Plot mean ramping rates and confidence interval
+for i = 4:7     % those trials are 20 frames per seconds, others are 50 frames per seconds
     rampnoturn{i} = rampnoturn{i}/2.5;
     rampturn{i} = rampturn{i}/2.5;
 end
@@ -133,6 +129,7 @@ ylabel('normalized dR/R per sec');
 axis([-0.5 1.5 0 0.2]);
 
 %% two-way ANOVA
+% two way: 1) different worms  2) with or without turn
 y = [];
 g1 = cell(0,0);
 g2 = cell(0,0);
@@ -224,7 +221,7 @@ for i = trial
 end
 set(0,'DefaultFigureVisible', 'on');
 %}
-%% illustrating
+%% illustrating linear regression and ramping rate
 i = 6;
 j = 3;
 tt = (time{i}(1,j)+1) : (time{i}(2,j)) ;

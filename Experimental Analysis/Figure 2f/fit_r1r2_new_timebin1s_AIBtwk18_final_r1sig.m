@@ -1,3 +1,6 @@
+% Please go to 'Figure 1C 1D/fit_r1r2_new_timebin1s_final_r1sig.m' for
+% annotation. The two code are exactly the same. 
+
 clearvars
 data=xlsread('QW373(combin)(halfnotcount).xlsx');
 dataf=data(:,1);

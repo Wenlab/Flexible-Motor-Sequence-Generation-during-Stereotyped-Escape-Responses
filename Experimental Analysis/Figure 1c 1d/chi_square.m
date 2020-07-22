@@ -1,10 +1,12 @@
+% This code calculates how well r1 and r2 are fitted, using chi square
+% test. 
 %% Get raw data from the figure
 
 open('fitted_r1r2_qw373_transfer_to1s_final.fig');
-lh = findall(gca, 'type', 'line');% 如果图中有多条曲线，lh为一个数组
-xc = get(lh, 'xdata');            % 取出x轴数据，xc是一个元胞数组
+lh = findall(gca, 'type', 'line');
+xc = get(lh, 'xdata');
 
-yc = get(lh, 'ydata');            % 取出y轴数据，yc是一个元胞数组
+yc = get(lh, 'ydata');
 
 % 5 12 19 26 33 40 47 54 61 68 75 82 89 96 
 

@@ -1,3 +1,5 @@
+% Please go to 'Figure 1C 1D/fit_r1r2_new_timebin1s_final_r1sig.m' for
+% annotation. The two code are exactly the same. 
 clearvars
 data=xlsread('fig4b_control');
 dataf=data(:,1);

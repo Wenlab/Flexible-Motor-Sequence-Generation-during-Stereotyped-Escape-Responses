@@ -1,9 +1,7 @@
-% Please go to 'Figure 3C\average.m' for
-% annotation. The two code are exactly the same. 
 clearvars
 backtimemax = 2000;
 smoothpara = 40;
-trial = 1:3;
+trial = 1:9;    % 7 for control, 9 for eat-4
 trialnum = length(trial);
 gcamp_ref = cell(1,trialnum);
 gcamp_ori = cell(1,trialnum);
@@ -12,11 +10,11 @@ smo = cell(1,trialnum);
 smo = cell(1,trialnum);
 time = cell(1,trialnum);
 for i = trial
-    temp = xlsread('data.xlsx',i);
+    temp = xlsread('dataeat4.xlsx',i);
     gcamp_ref{i} = temp(:,1);
     gcamp_ori{i} = temp(:,2);
     ratio{i} = temp(:,2)./temp(:,1);
-    time{i} = xlsread('time.xlsx',i);
+    time{i} = xlsread('timeeat4.xlsx',i);
     time{i} = [time{i};NaN*zeros(1,size(time{i},2))];
 end
 
@@ -81,13 +79,14 @@ smoback_low2 = smoback2 - smobackstd2;
 frame2 = 50;
 figure
 hold on
+backtimevis2 = 480;
 plot(((1:backtimevis2)-1)/frame2,smoback2(1:backtimevis2),'r');
 fill([((1:backtimevis2)-1)/frame2 fliplr(((1:backtimevis2)-1)/frame2)],[smoback_low2(1:backtimevis2) fliplr(smoback_up2(1:backtimevis2))],'r','facealpha',0.2,'edgealpha',0);
 title('RIB GCamp (AIB activated)');
-legend('RIB');
+legend('eat-4 (N=89)');
 xlabel('t/s');
 ylabel('dR/R0');
-axis([0 9.5 0 0.7]);
+axis([0 10 0 1]);
 
 %% single trial
 figure
@@ -98,7 +97,7 @@ for i = trial
                 if isnan( smo{i}(time{i}(1,j)) ) == 0
                     n = n+1;
                     tt = time{i}(1,j):time{i}(2,j);
-                    subplot(7,3,n);
+                    subplot(14,5,n);
                     hold on
                     plot((1:length(tt))/frame2,smo{i}(tt),'b');
                     plot((1:length(tt))/frame2,ratio{i}(tt),'b:');

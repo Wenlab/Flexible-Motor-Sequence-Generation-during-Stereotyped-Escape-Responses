@@ -1,3 +1,5 @@
+% Please go to 'Figure 3E-F\turnstart.m' for
+% annotation. The two code are exactly the same.
 clearvars
 minnum = 3;
 backtimemax = 10000;
@@ -42,7 +44,7 @@ for i = 1:trial
                 if isnan( smo{i}(time{i}(2,j)) ) == 0
                     n = n+1;
                     tt = time{i}(1,j):time{i}(3,j);
-                    %smo{i}(tt) = ( smo{i}(tt) - min(smo{i}(tt)) ) ./ min(smo{i}(tt));
+                    smo{i}(tt) = ( smo{i}(tt) - min(smo{i}(tt)) ) ./ min(smo{i}(tt));
                 end
             end
         end
@@ -154,9 +156,9 @@ for i = 1:trial
                     hold on
                     tt = (1:( time{i}(3,j) - time{i}(1,j) +1 ))/frame;
                     plot( tt ,smo{i}((time{i}(1,j)):time{i}(3,j)),'g');
-                    %plot( [(time{i}(3,j) - time{i}(1,j))/frame,(time{i}(3,j) - time{i}(1,j))/frame],[-10,10],'r','handlevisibility','off');
+                    plot( [(time{i}(3,j) - time{i}(1,j))/frame,(time{i}(3,j) - time{i}(1,j))/frame],[-10,10],'r','handlevisibility','off');
                     plot( [(time{i}(2,j) - time{i}(1,j))/frame,(time{i}(2,j) - time{i}(1,j))/frame],[-10,10],'r','handlevisibility','off');
-                    axis([0 7 1 6]);
+                    axis([0 7 0 1]);
                 end
             end
         end

@@ -1,3 +1,6 @@
+% Please go to 'Figure 2B-C\reversalends_2.m' for
+% annotation. The two code are exactly the same. 
+
 clearvars
 minnum = 3;
 backtimemax = 10000;

@@ -1,9 +1,7 @@
-% Please go to 'Figure 3C\average.m' for
-% annotation. The two code are exactly the same. 
 clearvars
 backtimemax = 2000;
 smoothpara = 40;
-trial = 1:3;
+trial = 1:8;
 trialnum = length(trial);
 gcamp_ref = cell(1,trialnum);
 gcamp_ori = cell(1,trialnum);
@@ -98,7 +96,7 @@ for i = trial
                 if isnan( smo{i}(time{i}(1,j)) ) == 0
                     n = n+1;
                     tt = time{i}(1,j):time{i}(2,j);
-                    subplot(7,3,n);
+                    subplot(13,5,n);
                     hold on
                     plot((1:length(tt))/frame2,smo{i}(tt),'b');
                     plot((1:length(tt))/frame2,ratio{i}(tt),'b:');

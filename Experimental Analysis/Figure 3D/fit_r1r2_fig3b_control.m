@@ -1,3 +1,5 @@
+% Please go to 'Figure 1C 1D/fit_r1r2_new_timebin1s_final_r1sig.m' for
+% annotation. The two code are exactly the same. 
 clearvars
 data=xlsread('fig3b_AIBchrimson',2);%1 for all data, 2 for data deleted the last two trials
 %data=xlsread('fig3b_inx1');

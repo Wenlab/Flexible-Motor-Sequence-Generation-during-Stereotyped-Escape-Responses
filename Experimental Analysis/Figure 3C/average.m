@@ -1,6 +1,6 @@
-clearvars
-backtimemax = 2000;
-smoothpara = 40;
+%% load data from data.xlsx and time.xlsx
+backtimemax = 2000; % maximum frame, doesn't really matter
+smoothpara = 40;    % parameter for smoothing; larger -> more smooth
 trial = 1:6;
 trialnum = length(trial);
 gcamp_ref = cell(1,trialnum);
@@ -9,6 +9,7 @@ ratio = cell(1,trialnum);
 smo = cell(1,trialnum);
 smo = cell(1,trialnum);
 time = cell(1,trialnum);
+% get raw ratio
 for i = trial
     temp = xlsread('data.xlsx',i);
     gcamp_ref{i} = temp(:,1);
@@ -17,7 +18,7 @@ for i = trial
     time{i} = xlsread('time.xlsx',i);
     time{i} = [time{i};NaN*zeros(1,size(time{i},2))];
 end
-
+% smooth data
 for i = trial
     smo{i} = smooth(ratio{i},smoothpara);
     %ratio_smo{i} = ratio{i};
@@ -27,7 +28,9 @@ for i = trial
         smo{i}( NaNPos(j) ) = NaN;
     end
 end
-
+%% single trial normalization
+% Key output of the section:
+% 'smo': smoothed and normalized GCaMP ratio 
 n = 0;
 for i = trial
     for j = 1:size(time{i},2)
@@ -41,8 +44,13 @@ for i = trial
         end
     end
 end
-back = cell(1,backtimemax);
 
+%% Get mean and SEM from 'smo'
+% 'back': a cell array in which each cell contains all the availble values
+%           for calculating the average at a time point during reversal
+% 'smoback': mean of smoothed and normalized signal
+% 'smobackstd': STD of smoothed and normalized signal
+back = cell(1,backtimemax);
 for i = trial
     for j = 1:size(time{i},2)
         if isnan(time{i}(1,j)) == 0
@@ -72,10 +80,7 @@ for t = 1:backtimemax
 end
 smoback_up2 = smoback2 + smobackstd2;
 smoback_low2 = smoback2 - smobackstd2;
-
-
-
-
+%% Plot mean
 frame2 = 50;
 figure
 hold on
@@ -87,7 +92,7 @@ xlabel('t/s');
 ylabel('dR/R0');
 %axis([0 6.5 -0.1 0.5]);
 
-%% single trial
+%% Plot single trial with sub figures
 figure
 n = 0;
 for i = trial

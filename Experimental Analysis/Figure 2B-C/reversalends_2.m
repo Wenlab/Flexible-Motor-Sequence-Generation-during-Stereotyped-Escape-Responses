@@ -1,8 +1,12 @@
+%%% This code plot both single trial GCaMP and mean GCaMP
+
 clearvars
-minnum = 3;
-backtimemax = 10000;
-frame = 50;
-smoothpara = 40;
+%% load data from data.xlsx and time.xlsx
+frame = 50;         % frames per second
+smoothpara = 40;    % parameter for smoothing; larger -> more smooth
+minnum = 3;         % if the number of availble data points is less than 3, 
+                    % the code would not calculate the mean and SEM. 
+backtimemax = 10000;% maximum frame, doesn't really matter
 trial = 8;
 gcamp_ref = cell(1,trial);
 gcamp_ori = cell(1,trial);
@@ -11,6 +15,7 @@ ratio_smo = cell(1,trial);
 smo = cell(1,trial);
 time = cell(1,trial);
 time_full = cell(1,trial);
+% get raw ratio
 for i = 1:trial
     temp = xlsread('data.xlsx',i);
     gcamp_ref{i} = temp(:,2);
@@ -19,8 +24,7 @@ for i = 1:trial
     time_full{i} = xlsread('time_2.xlsx',i);
     time{i} = time_full{i}(2:4,:);
 end
-
-%%
+% smooth data
 totaltime = length(gcamp_ref{1});
 for i = 1:trial
     ratio_smo{i} = smooth(ratio{i},smoothpara);
@@ -29,13 +33,13 @@ for i = 1:trial
     for j = 1:length( NaNPos )
         ratio_smo{i}( NaNPos(j) ) = NaN;
     end
-    %mintemp = min(ratio_smo{i});
-    %maxtemp = max(ratio_smo{i});
-    %smo{i} = ( ratio_smo{i} - mintemp ) ./ mintemp ;
     smo{i} = ratio_smo{i};
 end
 
 %% single trial normalization
+% Key output of the section:
+% 'smo': smoothed and normalized GCaMP ratio 
+% 'ratio: normalized GCaMP ratio 
 tt_rcd = cell(1,trial);
 tt_rcd{1} = [[3245;5173],[8466;9936]];
 tt_rcd{2} = [9535;10659];
@@ -77,7 +81,15 @@ for i = 1:3
 end
 
 individual_trial = n;
-%%
+%% This section generate 'heatmap' from 'smo'
+% Key output of the section:
+% 'turn': a cell array in which each cell contains all the availble values
+%           for calculating the average at a time point during turn
+% 'back': a cell array in which each cell contains all the availble values
+%           for calculating the average at a time point during reversal
+% Let turn starts as t=0, back{1} contains all the values at t = -20ms
+%                           turn{1} contains all the values at t = 20ms
+%                           (say it's 50fps)
 turn = cell(1,backtimemax);
 back = cell(1,backtimemax);
 heatmap = NaN*zeros(individual_trial+1,2*backtimemax-1);
@@ -94,7 +106,7 @@ for i = 1:trial
                 turnN = turnN+1;
                 n = turnN;
             end
-            % turn开始之后，turn中
+            % after turn starts, during turn
             for t = (time{i}(2,j)):(time_full{i}(5,j))
                 backtime = t-time{i}(2,j)+1;
                 if isnan(smo{i}(t)) == 0
@@ -104,7 +116,7 @@ for i = 1:trial
                     %heatmap(n,backtime+backtimemax) = smo{i}(t)-smo{i}(time{i}(2,j));
                 end
             end
-            % turn开始之前，reversal中
+            % before turn starts, during reversal
             for t = (time{i}(2,j)):(-1):time{i}(1,j)
                 backtime = time{i}(2,j)-t+1;
                 if isnan(smo{i}(t)) == 0
@@ -118,10 +130,12 @@ for i = 1:trial
         %end
     end
 end
-
+%% Plot mean GCaMP ratio
 figure
 hold on
-
+% plot mean and SEM during turn
+% 'smoback': mean of smoothed and normalized signal during turn
+% 'smobackstd': STD of smoothed and normalized signal during turn
 smoback = zeros(1,backtimemax);
 smobackstd = zeros(1,backtimemax);
 for t = 1:backtimemax
@@ -137,6 +151,9 @@ smoback_low = smoback - smobackstd;
 plot([((1:backtimevis)-1)/frame],[smoback(1:backtimevis)],'r');
 fill([((1:backtimevis)-1)/frame fliplr(((1:backtimevis)-1)/frame)],[smoback_low(1:backtimevis) fliplr(smoback_up(1:backtimevis))],'r','facealpha',0.2,'edgealpha',0,'handlevisibility','off');
 
+% plot mean and SEM during reversal
+% 'smoback': mean of smoothed and normalized signal during reversal
+% 'smobackstd': STD of smoothed and normalized signal during reversal
 smoback = zeros(1,backtimemax);
 smobackstd = zeros(1,backtimemax);
 for t = 1:backtimemax
@@ -156,7 +173,7 @@ title('AIB GCaMP before and after reversal ends');
 xlabel('t/s');
 ylabel('dR/R0');
 
-%% heat map
+%% Plot heat map
 figure
 hold on
 gca = pcolor(heatmap(:,(backtimemax-3*frame):(backtimemax+3*frame)));
@@ -173,7 +190,7 @@ axis([0 300 1 60]);
 %xticklabels({'-4','-3','-2','-1','0','1','2','3','4'});
 %colormap('jet');
 
-%% single trial
+%% Plot single trial with sub figures
 figure
 
 noturnN = 0;

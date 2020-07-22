@@ -1,3 +1,7 @@
+%%% Please go to 'RampingRate_.m' for annotation
+%%% This code keeps all trials in calculating ramping rate. (Note that all trials 
+%%% that last shorter than 1.5s are ignored in 'RampingRate_.m')
+
 clearvars
 mintime = 0;
 deleteth = 0.05;

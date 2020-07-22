@@ -1,8 +1,11 @@
+% This code plot mean calcium signal before and after type-2 transition
+%% load data from data.xlsx and time.xlsx
 clearvars
-minnum = 3;
-frame = 100;
-backtimemax = 10000;
-smoothpara = 40;
+minnum = 3;         % if the number of availble data points is less than 3, 
+                    % the code would not calculate the mean and SEM. 
+frame = 100;        % frames per second
+backtimemax = 10000;% maximum frame, doesn't really matter
+smoothpara = 40;    % parameter for smoothing; larger -> more smooth
 trial = 9;
 gcamp_ref = cell(1,trial);
 gcamp_ori = cell(1,trial);
@@ -25,7 +28,8 @@ for i = 1:trial
     smo{i} = ratio_smo{i};
 end
 totaltime = length(gcamp_ref{1});
-%% 
+
+%% Smooth and normalization
 n = 0;
 n_1 = 0;
 n_2 = 0;
@@ -51,17 +55,12 @@ end
 
 individual_trial = n;
 
-%%
-%{
-for i = 1:trial
-    mintemp = min(ratio_smo{i});
-    maxtemp = max(ratio_smo{i});
-    smo{i} = ( ratio_smo{i} - mintemp ) ./ mintemp ;
-end
-%}
-
-%%
-
+%%  Get mean and SEM from 'smo'
+% Key outputs of this section: 
+% 'turn': a cell array in which each cell contains all the availble values
+%           for calculating the average at a time point during turn
+% 'back': a cell array in which each cell contains all the availble values
+%           for calculating the average at a time point during reversal
 turn = cell(1,backtimemax);
 back = cell(1,backtimemax);
 for i = 1:trial
@@ -69,9 +68,7 @@ for i = 1:trial
         if isnan(time{i}(1,j)) == 0
             if isnan(time{i}(3,j)) == 0
                 if isnan( smo{i}(time{i}(2,j)) ) == 0
-                    % turn开始之后，turn中
-                    %plot(1:( time{i}(3,j) - time{i}(2,j) ),smo{i}((time{i}(2,j)+1):time{i}(3,j))-smo{i}(time{i}(2,j)));
-                    %hold on
+                    % after turn starts, during turn
                     for t = (time{i}(2,j)+1):time{i}(3,j)
                         backtime = t-time{i}(2,j);
                         if isnan(smo{i}(t)) == 0
@@ -79,8 +76,8 @@ for i = 1:trial
                             %turn{backtime} = [turn{backtime},smo{i}(t)];
                         end
                     end
-                    % turn开始之前，后退中
                     
+                    % before turn starts, during reversal
                     for t = (time{i}(2,j)-1):(-1):time{i}(1,j)
                         backtime = time{i}(2,j)-t;
                         if isnan(smo{i}(t)) == 0
@@ -94,10 +91,12 @@ for i = 1:trial
         end
     end
 end
-
+%% Plot mean GCaMP ratio
 figure
 hold on
-
+% plot mean and SEM during turn
+% 'smoback': mean of smoothed and normalized signal during turn
+% 'smobackstd': STD of smoothed and normalized signal during turn
 smoback = zeros(1,backtimemax);
 smobackstd = zeros(1,backtimemax);
 for t = 1:backtimemax
@@ -112,6 +111,8 @@ smoback_low = smoback - smobackstd;
 plot([0,(1:backtimevis)/frame],[0,smoback(1:backtimevis)],'b');
 fill([((1:backtimevis)-1)/frame fliplr(((1:backtimevis)-1)/frame)],[smoback_low(1:backtimevis) fliplr(smoback_up(1:backtimevis))],'b','facealpha',0.2,'edgealpha',0);
 
+% 'smoback': mean of smoothed and normalized signal during reversal
+% 'smobackstd': STD of smoothed and normalized signal during reversal
 smoback = zeros(1,backtimemax);
 smobackstd = zeros(1,backtimemax);
 for t = 1:backtimemax

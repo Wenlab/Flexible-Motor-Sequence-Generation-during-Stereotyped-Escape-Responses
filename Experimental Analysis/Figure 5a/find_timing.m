@@ -1,3 +1,4 @@
+% This code extracts the start and end time of recording from .xlsx
 clearvars
 minnum = 3;
 backtimemax = 10000;

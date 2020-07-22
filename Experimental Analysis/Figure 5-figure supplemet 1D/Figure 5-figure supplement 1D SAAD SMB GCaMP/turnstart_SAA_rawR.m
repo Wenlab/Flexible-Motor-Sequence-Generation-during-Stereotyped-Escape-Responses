@@ -1,6 +1,7 @@
+% Please go to 'Figure 3E-F\turnstart.m' for
+% annotation. The two code are exactly the same.
 clearvars
 minnum = 3;
-plotlength = 3;
 backtimemax = 10000;
 frame = 50;
 smoothpara = 40;
@@ -17,18 +18,6 @@ for i = 1:trial
     gcamp_ori{i} = temp(:,2);
     ratio{i} = temp(:,2)./temp(:,1);
     time{i} = xlsread('time.xlsx',i);
-end
-
-%% transifer time matrix
-for i = 1:trial
-    temp = time{i};
-    temp(2,:) = time{i}(1,:);
-    temp(3,:) = time{i}(3,:);   % time{i}(3,:) includes turn behavior. time{i}(2,:) only contains reversal
-    temp(1,1) = max([1,time{i}(1,1) - plotlength*frame]);
-    for j = 2:size(time{i},2)
-        temp(1,j) = max([time{i}(3,j-1)+1,time{i}(1,j) - plotlength*frame]);
-    end
-    time{i} = temp;
 end
 
 %%
@@ -55,7 +44,7 @@ for i = 1:trial
                 if isnan( smo{i}(time{i}(2,j)) ) == 0
                     n = n+1;
                     tt = time{i}(1,j):time{i}(3,j);
-                    smo{i}(tt) = ( smo{i}(tt) - min(smo{i}(tt)) ) ./ min(smo{i}(tt));
+                    %smo{i}(tt) = ( smo{i}(tt) - min(smo{i}(tt)) ) ./ min(smo{i}(tt));
                 end
             end
         end
@@ -80,8 +69,8 @@ for i = 1:trial
                     for t = (time{i}(2,j)):(time{i}(3,j))
                         backtime = t-time{i}(2,j)+1;
                         if isnan(smo{i}(t)) == 0
-                            turn{backtime} = [turn{backtime},smo{i}(t)];
-                            %turn{backtime} = [turn{backtime},smo{i}(t)-smo{i}(time{i}(2,j))];
+                            %turn{backtime} = [turn{backtime},smo{i}(t)];
+                            turn{backtime} = [turn{backtime},smo{i}(t)-smo{i}(time{i}(2,j))];
                             heatmap(n,backtime+backtimemax) = smo{i}(t);
                             %heatmap(n,backtime+backtimemax) = smo{i}(t)-smo{i}(time{i}(2,j));
                         end
@@ -91,8 +80,8 @@ for i = 1:trial
                     for t = (time{i}(2,j)):(-1):time{i}(1,j)
                         backtime = time{i}(2,j)-t+1;
                         if isnan(smo{i}(t)) == 0
-                            back{backtime} = [back{backtime},smo{i}(t)];
-                            %back{backtime} = [back{backtime},smo{i}(t)-smo{i}(time{i}(2,j))];
+                            %back{backtime} = [back{backtime},smo{i}(t)];
+                            back{backtime} = [back{backtime},smo{i}(t)-smo{i}(time{i}(2,j))];
                             heatmap(n,backtimemax+1-backtime) = smo{i}(t);
                             %heatmap(n,backtime+backtimemax) = smo{i}(t)-smo{i}(time{i}(2,j));
                         end
@@ -116,11 +105,11 @@ for t = 1:backtimemax
         backtimevis = t;
     end
 end
-backtimevis = min(plotlength*frame,backtimevis);
+backtimevis = min(3*frame,backtimevis);
 smoback_up = smoback + smobackstd;
 smoback_low = smoback - smobackstd;
-plot([((1:backtimevis)-1)/frame],[smoback(1:backtimevis)],'b');
-fill([((1:backtimevis)-1)/frame fliplr(((1:backtimevis)-1)/frame)],[smoback_low(1:backtimevis) fliplr(smoback_up(1:backtimevis))],'b','facealpha',0.2,'edgealpha',0,'handlevisibility','off');
+plot([((1:backtimevis)-1)/frame],[smoback(1:backtimevis)],'r');
+fill([((1:backtimevis)-1)/frame fliplr(((1:backtimevis)-1)/frame)],[smoback_low(1:backtimevis) fliplr(smoback_up(1:backtimevis))],'r','facealpha',0.2,'edgealpha',0,'handlevisibility','off');
 
 smoback = zeros(1,backtimemax);
 smobackstd = zeros(1,backtimemax);
@@ -131,13 +120,13 @@ for t = 1:backtimemax
         backtimevis = t;
     end
 end
-backtimevis = min(plotlength*frame,backtimevis);
+backtimevis = min(3*frame,backtimevis);
 smoback_up = smoback + smobackstd;
 smoback_low = smoback - smobackstd;
-plot(fliplr(((1:backtimevis)-backtimevis)/frame),smoback(1:backtimevis),'b','handlevisibility','off');
-fill([fliplr(((1:backtimevis)-backtimevis)/frame) ((1:backtimevis)-backtimevis)/frame],[smoback_low(1:backtimevis) fliplr(smoback_up(1:backtimevis))],'b','facealpha',0.2,'edgealpha',0,'handlevisibility','off');
+plot(fliplr(((1:backtimevis)-backtimevis)/frame),smoback(1:backtimevis),'r','handlevisibility','off');
+fill([fliplr(((1:backtimevis)-backtimevis)/frame) ((1:backtimevis)-backtimevis)/frame],[smoback_low(1:backtimevis) fliplr(smoback_up(1:backtimevis))],'r','facealpha',0.2,'edgealpha',0,'handlevisibility','off');
 
-title('SAAD/SMB GCaMP after reversal starts');
+title('SAAD/SMB GCaMP before and after turn starts');
 xlabel('t/s');
 ylabel('dR/R0');
 
@@ -147,9 +136,31 @@ gca = pcolor(heatmap(:,(backtimemax-3*frame):(backtimemax+3*frame)));
 %caxis([-0.02 1]);
 set(gca,'LineStyle','none');
 colorbar;
-title('SAAD/SMB GCaMP after reversal starts');
+title('SAAD/SMB GCaMP before and after turn starts');
 xlabel('t/s');
 ylabel('trial');
 %xticks([1 50 100 150 200 250 300 350 400]);
 %xticklabels({'-4','-3','-2','-1','0','1','2','3','4'});
 %colormap('jet');
+
+%% single trial
+figure
+n = 0;
+for i = 1:trial
+    for j = 1:size(time{i},2)
+        if isnan(time{i}(1,j)) == 0
+            if isnan(time{i}(3,j)) == 0
+                if isnan( smo{i}(time{i}(2,j)) ) == 0
+                    n = n + 1;
+                    subplot(7,7,n);
+                    hold on
+                    tt = (1:( time{i}(3,j) - time{i}(1,j) +1 ))/frame;
+                    plot( tt ,smo{i}((time{i}(1,j)):time{i}(3,j)),'g');
+                    %plot( [(time{i}(3,j) - time{i}(1,j))/frame,(time{i}(3,j) - time{i}(1,j))/frame],[-10,10],'r','handlevisibility','off');
+                    plot( [(time{i}(2,j) - time{i}(1,j))/frame,(time{i}(2,j) - time{i}(1,j))/frame],[-10,10],'r','handlevisibility','off');
+                    axis([0 7 1 6]);
+                end
+            end
+        end
+    end
+end

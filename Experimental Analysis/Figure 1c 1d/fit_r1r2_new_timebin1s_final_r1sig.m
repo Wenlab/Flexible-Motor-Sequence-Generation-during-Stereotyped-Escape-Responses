@@ -1,42 +1,55 @@
 clearvars
-data=xlsread('QW373(combin)(halfnotcount).xlsx');
-dataf=data(:,1);
-datab=data(:,2);
+%% load data from .xlsx
+data = xlsread('QW373(combin)(halfnotcount).xlsx');
+dataf = data(:,1);
+datab = data(:,2);
 
-ddt=1;
+%% Setting time bin width
+FracBin = 1;    % for example, 1 and 2 represent time bin width = 1s and 0.5s, respectively
+ddt = 1;  
+dataf = FracBin*dataf;
+datab = FracBin*datab;
 
-FracBin=1;    %1.5 or 2.5 is good
-dataf=FracBin*dataf;
-datab=FracBin*datab;
-
-max1=ceil(max(max(dataf),max(datab)));
-distf=zeros(1,ceil(max1/ddt));
-for j=1:(length(dataf))
+%% get histogram
+% distf: type-1 reversal length histogram
+% distb: type-2 reversal length histogram
+% disttotal: total reversal length histogram
+% svv: total survival function
+% deadf,errf: type-1 transition rate and corresponding confidence interval
+% deadb,errb: type-2 transition rate and corresponding confidence interval
+% deadtotal,errtotal: total transition rate and corresponding confidence interval
+max1 = ceil(max(max(dataf),max(datab)));
+distf = zeros(1,ceil(max1/ddt));
+for j = 1:(length(dataf))
     if dataf(j)>-0.1
-        distf(ceil(dataf(j)/ddt))=distf(ceil(dataf(j)/ddt))+1;
+        distf(ceil(dataf(j)/ddt)) = distf(ceil(dataf(j)/ddt))+1;
     end
 end
 
-distb=zeros(1,ceil(max1/ddt));
-for j=1:(length(datab))
-    if datab(j)>-0.1
-        distb(ceil(datab(j)/ddt))=distb(ceil(datab(j)/ddt))+1;
+distb = zeros(1,ceil(max1/ddt));
+for j = 1:(length(datab))
+    if datab(j) >- 0.1
+        distb(ceil(datab(j)/ddt)) = distb(ceil(datab(j)/ddt))+1;
     end
 end
 
-disttotal=distf+distb;
-total=sum(disttotal);
-dead=0;
-svv(1)=total;
-for i=1:max1
-    dead=dead+disttotal(i);
-    svv(i+1)=total-dead;
+disttotal = distf+distb;
+total = sum(disttotal);
+dead = 0;
+svv(1) = total;
+for i = 1:max1
+    dead = dead+disttotal(i);
+    svv(i+1) = total-dead;
 end
-svv=svv(1:length(svv)-1);
-[deadf,errf]=binofit(distf,svv);
-[deadb,errb]=binofit(distb,svv);
-[deadtotal,errtotal]=binofit(disttotal,svv);
+svv = svv(1:length(svv)-1);
+[deadf,errf] = binofit(distf,svv);
+[deadb,errb] = binofit(distb,svv);
+[deadtotal,errtotal] = binofit(disttotal,svv);
 
+%% fit r1 and r2
+% r1 has been abondoned
+% k0 is the initial vector of the four parameters, kfit2 is the fitted
+% parameters
 xx1 = 1:max1;
 xdata = (xx1-1/2)*ddt/FracBin;
 ydata = deadf;
@@ -55,10 +68,10 @@ r2 = @(k,xdata) k(1)./erfi(k(2)+k(3).*exp(-xdata./k(4)));
 k0 = [0.0233,0.1746,0.7092,0.2889];
 kfit2 = lsqcurvefit(r2,k0,xdata,ydata);
 
-%% 
+%% plot figure
 figure
-xx1=1:max1;
-X=(xx1-1/2)*ddt/FracBin;
+xx1 = 1:max1;
+X = (xx1-1/2)*ddt/FracBin;
 
 errorbar(X,deadb,errb(:,1)'-deadb,-errb(:,2)'+deadb,'gs');
 hold on
@@ -70,7 +83,6 @@ plot(XX,r1(kfit1,XX),'r');
 %End=max1/FracBin;  %max1/FracBin
 End = 7;
 
-title('Transition Rate (N=300)');
 legend('r2','r1','fitted r2','fitted r1');
 xlabel('t/s');
 ylabel('rate');
