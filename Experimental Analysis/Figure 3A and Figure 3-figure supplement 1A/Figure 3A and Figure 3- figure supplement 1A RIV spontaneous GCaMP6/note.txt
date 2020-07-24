@@ -1,7 +1,0 @@
-These two excel tables (data and time) correspond to Figure 3A and Figure 3-figure supplement 1A,
-In the data file,every sheet represents the calcium signal from one worm; In every sheet, the first column is wCherry signal and the second column is GCaMP6 signal,and line numbers correspond to frames.
-In the time file,every sheet represents the frame information of different motor state from one worm; from top to bottom, each column separately corresponds to: reversal start frame, reversal end frame£¨or turn start frame), turn end frame.
-
-
-
- 

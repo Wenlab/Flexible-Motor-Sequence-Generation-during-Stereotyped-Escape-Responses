@@ -76,9 +76,7 @@ for i = 1:trial
             if isnan(time{i}(3,j)) == 0
                 if isnan( smo{i}(time{i}(2,j)) ) == 0
                     n = n+1;
-                    % turn开始之后，turn中
-                    %plot(1:( time{i}(3,j) - time{i}(2,j) ),smo{i}((time{i}(2,j)+1):time{i}(3,j))-smo{i}(time{i}(2,j)));
-                    %hold on
+
                     for t = (time{i}(2,j)):(time{i}(3,j))
                         backtime = t-time{i}(2,j)+1;
                         if isnan(smo{i}(t)) == 0
@@ -88,7 +86,6 @@ for i = 1:trial
                             %heatmap(n,backtime+backtimemax) = smo{i}(t)-smo{i}(time{i}(2,j));
                         end
                     end
-                    % turn开始之前，reversal中
                     
                     for t = (time{i}(2,j)):(-1):time{i}(1,j)
                         backtime = time{i}(2,j)-t+1;

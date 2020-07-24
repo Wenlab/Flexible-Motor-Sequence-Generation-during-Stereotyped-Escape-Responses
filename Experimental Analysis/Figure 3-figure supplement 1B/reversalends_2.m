@@ -90,7 +90,6 @@ for i = 1:trial
                 n = turnN;
                 plot_t = (time{i}(2,j)):(time{i}(3,j));
             end
-            % turn开始之后，turn中
             
             for t = plot_t
                 backtime = t-time{i}(2,j)+1;
@@ -101,7 +100,7 @@ for i = 1:trial
                     heatmap(n,backtime+backtimemax) = smo{i}(t)-smo{i}(time{i}(2,j));
                 end
             end
-            % turn开始之前，reversal中
+
             for t = (time{i}(2,j)):(-1):time{i}(1,j)
                 backtime = time{i}(2,j)-t+1;
                 if isnan(smo{i}(t)) == 0
