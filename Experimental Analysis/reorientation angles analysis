@@ -1,0 +1,10 @@
+turnframes = xlsread('w7',1);%different worms in different sheets
+xcent = Centerline(:,:,1);%x coordinate 
+ycent = Centerline(:,:,2);%y coordinate
+for i = 1:size(turnframes,1)
+    endf(i) = turnframes(i,1);%use the last characteristic frame to help define the turn
+    A1(i,:) = [mean(xcent(endf(i),1:5))-mean(xcent(endf(i),10:14)) mean(ycent(endf(i),1:5))-mean(ycent(endf(i),10:14))];%head vector
+    A2(i,:) = [mean(xcent(endf(i),86:90))-mean(xcent(endf(i),96:100)) mean(ycent(endf(i),86:90))-mean(ycent(endf(i),96:100))];%tail vector
+    thetaoff(i) = acos(dot(A1(i,:),A2(i,:))/(sqrt(dot(A1(i,:),A1(i,:)))*sqrt(dot(A2(i,:),A2(i,:)))));%the Angle between two vectors
+    degthetaoff(i) = round(rad2deg(thetaoff(i)));
+end
